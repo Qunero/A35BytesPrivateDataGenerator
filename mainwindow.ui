@@ -629,7 +629,7 @@ Detail</string>
             </size>
            </property>
            <property name="text">
-            <string>Default</string>
+            <string>&amp;Default</string>
            </property>
           </widget>
          </item>
@@ -654,7 +654,7 @@ Detail</string>
             </size>
            </property>
            <property name="text">
-            <string>Open</string>
+            <string>&amp;Open</string>
            </property>
           </widget>
          </item>
@@ -679,7 +679,7 @@ Detail</string>
             </size>
            </property>
            <property name="text">
-            <string>Close</string>
+            <string>&amp;Close</string>
            </property>
           </widget>
          </item>
@@ -704,7 +704,7 @@ Detail</string>
             </size>
            </property>
            <property name="text">
-            <string>Save</string>
+            <string>&amp;Save</string>
            </property>
           </widget>
          </item>
@@ -729,7 +729,7 @@ Detail</string>
             </size>
            </property>
            <property name="text">
-            <string>Save As</string>
+            <string>Save &amp;As</string>
            </property>
           </widget>
          </item>
@@ -754,7 +754,7 @@ Detail</string>
             </size>
            </property>
            <property name="text">
-            <string>Exit</string>
+            <string>E&amp;xit</string>
            </property>
           </widget>
          </item>
@@ -803,7 +803,10 @@ Detail</string>
          <item>
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>Private Data</string>
+            <string>P&amp;rivate Data</string>
+           </property>
+           <property name="buddy">
+            <cstring>lineEdit_result</cstring>
            </property>
           </widget>
          </item>
