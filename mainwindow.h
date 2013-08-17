@@ -11,7 +11,7 @@
 #include <QString>
 
 #define _MYSTR(X) #X
-#define APP_REVISION "1.0.3"
+#define APP_REVISION "1.0.4"
 
 namespace Ui {
 class MainWindow;

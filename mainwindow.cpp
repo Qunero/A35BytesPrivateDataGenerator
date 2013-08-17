@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->label_index->setMinimumWidth(sizeHint().width()); // get proper width for different OS platform
     lBitStatusForDisableGenerator = 0;
     _pHexStrValidator = new QRegExpValidator(QRegExp("(?:[_\\dA-Fa-f]{2})(?::[_\\dA-Fa-f]{2}){0,3}"), this);
     _pDecStrValidator = new QRegExpValidator(QRegExp("\\d{1,10}"), this); // 0xffffffff==4294967295,10numbers
@@ -134,26 +135,32 @@ long MainWindow::convertHexStrToLong(QString str)
 
 void MainWindow::iSetDefaultCheckBox()
 {
-    ui->checkBox_1->setChecked(true);
-    ui->checkBox_2->setChecked(true);
-    ui->checkBox_3->setChecked(true);
-    ui->checkBox_5->setChecked(true);
-    ui->checkBox_6->setChecked(true);
-    ui->checkBox_7->setChecked(true);
-    ui->checkBox_8->setChecked(true);
-    ui->checkBox_9->setChecked(true);
-    ui->checkBox_10->setChecked(true);
-    ui->checkBox_12->setChecked(true);
-    emit ui->checkBox_1->toggled(true);
-    emit ui->checkBox_2->toggled(true);
-    emit ui->checkBox_3->toggled(true);
-    emit ui->checkBox_5->toggled(true);
-    emit ui->checkBox_6->toggled(true);
-    emit ui->checkBox_7->toggled(true);
-    emit ui->checkBox_8->toggled(true);
-    emit ui->checkBox_9->toggled(true);
-    emit ui->checkBox_10->toggled(true);
-    emit ui->checkBox_12->toggled(true);
+    /*
+     * Note: we should set checkbox to checked, and emit the toggled signal;
+     *       But call emit checkBox->toggled(true) failed in QT4;
+     *       So here we use a trick;
+     * Fixed Bug: qabstractbutton.h:128: error: 'void QAbstractButton::toggled(bool)' is protected
+     */
+    ui->checkBox_1->setChecked(false);
+    ui->checkBox_2->setChecked(false);
+    ui->checkBox_3->setChecked(false);
+    ui->checkBox_5->setChecked(false);
+    ui->checkBox_6->setChecked(false);
+    ui->checkBox_7->setChecked(false);
+    ui->checkBox_8->setChecked(false);
+    ui->checkBox_9->setChecked(false);
+    ui->checkBox_10->setChecked(false);
+    ui->checkBox_12->setChecked(false);
+    ui->checkBox_1->toggle();
+    ui->checkBox_2->toggle();
+    ui->checkBox_3->toggle();
+    ui->checkBox_5->toggle();
+    ui->checkBox_6->toggle();
+    ui->checkBox_7->toggle();
+    ui->checkBox_8->toggle();
+    ui->checkBox_9->toggle();
+    ui->checkBox_10->toggle();
+    ui->checkBox_12->toggle();
 }
 
 void MainWindow::iSetDefaultDataForAll()
