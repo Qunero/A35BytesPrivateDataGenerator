@@ -5,9 +5,13 @@
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QClipboard>
 #include <QRegExp>
 #include <QRegExpValidator>
 #include <QString>
+
+#define _MYSTR(X) #X
+#define APP_REVISION "1.0.3"
 
 namespace Ui {
 class MainWindow;
@@ -46,6 +50,7 @@ private slots:
     void on_comboBox_4_currentIndexChanged(int index);
     void on_comboBox_11_currentIndexChanged(int index);
 
+    void on_lineEdit_result_selectionChanged();
     void on_lineEdit_1_textChanged(const QString &arg1);
     void on_lineEdit_2_textChanged(const QString &arg1);
     void on_lineEdit_3_textChanged(const QString &arg1);
@@ -57,6 +62,7 @@ private slots:
     void on_lineEdit_10_textChanged(const QString &arg1);
     void on_lineEdit_12_textChanged(const QString &arg1);
 
+    void on_pushButton_close_clicked();
     void on_pushButton_default_clicked();
     void on_pushButton_generate_clicked();
     void on_pushButton_open_clicked();
@@ -73,10 +79,17 @@ private slots:
     void showHelpMessageBox();
     bool showPrivateData();
 
+    void setGeneratorStatusByBite(int bit);
+    void clearGeneratorStatusByBite(int bit);
+
 private:
     bool bHaveSelectedFile;
+    long lBitStatusForDisableGenerator;
     QRegExpValidator * _pHexStrValidator;
     QRegExpValidator * _pDecStrValidator;
+    QString strInputMaskHex1; // 1 groups, 2 hex num,eg: 1F
+    QString strInputMaskHex2; // 2 groups, 4 hex num,eg: 02:4F
+    QString strInputMaskHex4; // 4 groups, 8 hex num,eg: 01:24:48:8F
     QString strFileName;
     QString strManufactoryID;
     QString strFrequency;
@@ -91,6 +104,8 @@ private:
     QString strOtaMode;
     QString strSerialControl;
     QString strResult;
+    QString strMsgAboutSoftware;
+    QString strMsgHelpDetail;
     Ui::MainWindow *ui;
 };
 

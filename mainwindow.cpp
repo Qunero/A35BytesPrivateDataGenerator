@@ -6,9 +6,39 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    _pHexStrValidator = new QRegExpValidator(QRegExp("([\\dA-Fa-f]{2})(:[\\dA-Fa-f]{2}){0,3}"), this);
+    lBitStatusForDisableGenerator = 0;
+    _pHexStrValidator = new QRegExpValidator(QRegExp("(?:[_\\dA-Fa-f]{2})(?::[_\\dA-Fa-f]{2}){0,3}"), this);
     _pDecStrValidator = new QRegExpValidator(QRegExp("\\d{1,10}"), this); // 0xffffffff==4294967295,10numbers
+    strInputMaskHex1 = ">HH;_";
+    strInputMaskHex2 = ">HH:HH;_";
+    strInputMaskHex4 = ">HH:HH:HH:HH;_";
     bHaveSelectedFile = false;
+    strMsgAboutSoftware =
+            "          PrivateDataGenerator V" APP_REVISION "      \n"
+            "This software is for generating Private Data that\n"
+            "follows the COSHIP OTC Standard.\n"
+            "-------------------------------------------------\n"
+            "********   Author: QuNengrong (Neo Qu)   ********\n"
+            "********   Email : Quner612#qq.com       ********\n"
+            "-------------------------------------------------\n"
+            "Copyright (c) 2013, Coship, All rights reserved.";
+    strMsgHelpDetail =
+            "        PrivateDataGenerator User Guide        \n"
+            "1. Click 'Default' or 'Open' to get basic data;\n"
+            "2. Edit the data as you wish\n"
+            "3. Click 'Generate' to get your private data\n"
+            "4. Copy the private data, or Save it to a file\n"
+            "-------------------------------------------------\n"
+            "        PrivateDataGenerator Edit Tips        \n"
+            "A). Hex data only accept data like this: ##, ##:##,\n"
+            "   ##:##:##:##, where, # stands for hex numbers;\n"
+            "B). While edit, you may uncheck the CheckBox in the\n"
+            "   Same line, to see the Decimal value of the line.\n"
+            "-------------------------------------------------\n"
+            "********   Author: QuNengrong (Neo Qu)   ********\n"
+            "********   Email : Quner612#qq.com       ********\n"
+            "-------------------------------------------------\n"
+            "Copyright (c) 2013, Coship, All rights reserved.";
     QObject::connect(this->ui->actionOpen,SIGNAL(triggered()),this,SLOT(openFile()));
     QObject::connect(this->ui->actionClose,SIGNAL(triggered()),this,SLOT(closeFile()));
     QObject::connect(this->ui->actionHelp,SIGNAL(triggered()),this,SLOT(showHelpMessageBox()));
@@ -42,12 +72,11 @@ bool MainWindow::closeFile()
         return false;
     }
 
-    // stop data parsing
-
     // set status
     this->bHaveSelectedFile = false;
 
     // clean up data
+    iSetDefaultDataForAll();
 
     return true;
 }
@@ -72,7 +101,7 @@ QString MainWindow::convertDecStrToHex(QString str, int groups)
         //qDebug() << "in convertDecStrToHex: i="<< i << "strHex =>" << strHex;
         i += 3;
     }
-    //qDebug() << "in convertDecStrToHex: strHex =>" << strHex;
+    //qDebug() << "in convertDecStrToHex: str => strHex:" << str << "=>" << strHex;
     return strHex;
 }
 
@@ -129,7 +158,7 @@ void MainWindow::iSetDefaultCheckBox()
 
 void MainWindow::iSetDefaultDataForAll()
 {
-    qDebug() << "in iSetDefaultDataForAll...";
+    //qDebug() << "in iSetDefaultDataForAll...";
     iSetDefaultCheckBox();
     iSetDefaultLineEdit();
     showPrivateData();
@@ -154,172 +183,215 @@ void MainWindow::iSetDefaultLineEdit()
 
 void MainWindow::on_checkBox_1_toggled(bool checked)
 {
-    qDebug() << "Checked status:" << checked;
+    //qDebug() << "Checked status:" << checked;
+    ui->lineEdit_1->clear(); // clear it, in case old InputMask cause textChanged()
+    //qDebug() << "Cleared data: ui->lineEdit_1->text() =>" << ui->lineEdit_1->text();
     if (checked)
     {
         // show hex
         strManufactoryID = convertDecStrToHex(strManufactoryID, 4);
         ui->lineEdit_1->setValidator(_pHexStrValidator);
+        ui->lineEdit_1->setInputMask(strInputMaskHex4);
     }
     else
     {
         // show dec
         strManufactoryID = QString::number(convertHexStrToLong(strManufactoryID));
         ui->lineEdit_1->setValidator(_pDecStrValidator);
+        ui->lineEdit_1->setInputMask("");
+        setGeneratorStatusByBite(1);
     }
+
+    //Notice, should set content first, then call setInputMask
     //qDebug() << "update strManufactoryID =>" << strManufactoryID;
     ui->lineEdit_1->setText(strManufactoryID);
 }
 
 void MainWindow::on_checkBox_2_toggled(bool checked)
 {
+    ui->lineEdit_2->clear();
     if (checked)
     {
         // show hex
         strFrequency = convertDecStrToHex(strFrequency, 4);
         ui->lineEdit_2->setValidator(_pHexStrValidator);
+        ui->lineEdit_2->setInputMask(strInputMaskHex4);
     }
     else
     {
         // show dec
         strFrequency = QString::number(convertHexStrToLong(strFrequency));
         ui->lineEdit_2->setValidator(_pDecStrValidator);
+        ui->lineEdit_2->setInputMask("");
+        setGeneratorStatusByBite(2);
     }
     ui->lineEdit_2->setText(strFrequency);
 }
 
 void MainWindow::on_checkBox_3_toggled(bool checked)
 {
+    ui->lineEdit_3->clear();
     if (checked)
     {
         // show hex
         strSymRate = convertDecStrToHex(strSymRate, 4);
         ui->lineEdit_3->setValidator(_pHexStrValidator);
+        ui->lineEdit_3->setInputMask(strInputMaskHex4);
     }
     else
     {
         // show dec
         strSymRate = QString::number(convertHexStrToLong(strSymRate));
         ui->lineEdit_3->setValidator(_pDecStrValidator);
+        ui->lineEdit_3->setInputMask("");
+        setGeneratorStatusByBite(3);
     }
     ui->lineEdit_3->setText(strSymRate);
 }
 
 void MainWindow::on_checkBox_5_toggled(bool checked)
 {
+    ui->lineEdit_5->clear();
     if (checked)
     {
         // show hex
         strPid = convertDecStrToHex(strPid, 2);
         ui->lineEdit_5->setValidator(_pHexStrValidator);
+        ui->lineEdit_5->setInputMask(strInputMaskHex2);
     }
     else
     {
         // show dec
         strPid = QString::number(convertHexStrToLong(strPid));
         ui->lineEdit_5->setValidator(_pDecStrValidator);
+        ui->lineEdit_5->setInputMask("");
+        setGeneratorStatusByBite(5);
     }
     ui->lineEdit_5->setText(strPid);
 }
 
 void MainWindow::on_checkBox_6_toggled(bool checked)
 {
+    ui->lineEdit_6->clear();
     if (checked)
     {
         // show hex
         strStartSerialNo = convertDecStrToHex(strStartSerialNo, 4);
         ui->lineEdit_6->setValidator(_pHexStrValidator);
+        ui->lineEdit_6->setInputMask(strInputMaskHex4);
     }
     else
     {
         // show dec
         strStartSerialNo = QString::number(convertHexStrToLong(strStartSerialNo));
         ui->lineEdit_6->setValidator(_pDecStrValidator);
+        ui->lineEdit_6->setInputMask("");
+        setGeneratorStatusByBite(6);
     }
     ui->lineEdit_6->setText(strStartSerialNo);
 }
 
 void MainWindow::on_checkBox_7_toggled(bool checked)
 {
+    ui->lineEdit_7->clear();
     if (checked)
     {
         // show hex
         strEndSerialNo = convertDecStrToHex(strEndSerialNo, 4);
         ui->lineEdit_7->setValidator(_pHexStrValidator);
+        ui->lineEdit_7->setInputMask(strInputMaskHex4);
     }
     else
     {
         // show dec
         strEndSerialNo = QString::number(convertHexStrToLong(strEndSerialNo));
         ui->lineEdit_7->setValidator(_pDecStrValidator);
+        ui->lineEdit_7->setInputMask("");
+        setGeneratorStatusByBite(7);
     }
     ui->lineEdit_7->setText(strEndSerialNo);
 }
 
 void MainWindow::on_checkBox_8_toggled(bool checked)
 {
+    ui->lineEdit_8->clear();
     if (checked)
     {
         // show hex
         strSoftVer = convertDecStrToHex(strSoftVer, 4);
         ui->lineEdit_8->setValidator(_pHexStrValidator);
+        ui->lineEdit_8->setInputMask(strInputMaskHex4);
     }
     else
     {
         // show dec
         strSoftVer = QString::number(convertHexStrToLong(strSoftVer));
         ui->lineEdit_8->setValidator(_pDecStrValidator);
+        ui->lineEdit_8->setInputMask("");
+        setGeneratorStatusByBite(8);
     }
     ui->lineEdit_8->setText(strSoftVer);
 }
 
 void MainWindow::on_checkBox_9_toggled(bool checked)
 {
+    ui->lineEdit_9->clear();
     if (checked)
     {
         // show hex
         strHardwareVer = convertDecStrToHex(strHardwareVer, 4);
         ui->lineEdit_9->setValidator(_pHexStrValidator);
+        ui->lineEdit_9->setInputMask(strInputMaskHex4);
     }
     else
     {
         // show dec
         strHardwareVer = QString::number(convertHexStrToLong(strHardwareVer));
         ui->lineEdit_9->setValidator(_pDecStrValidator);
+        ui->lineEdit_9->setInputMask("");
+        setGeneratorStatusByBite(9);
     }
     ui->lineEdit_9->setText(strHardwareVer);
 }
 
 void MainWindow::on_checkBox_10_toggled(bool checked)
 {
+    ui->lineEdit_10->clear();
     if (checked)
     {
         // show hex
         strHwControl = convertDecStrToHex(strHwControl, 1);
         ui->lineEdit_10->setValidator(_pHexStrValidator);
+        ui->lineEdit_10->setInputMask(strInputMaskHex1);
     }
     else
     {
         // show dec
         strHwControl = QString::number(convertHexStrToLong(strHwControl));
         ui->lineEdit_10->setValidator(_pDecStrValidator);
+        ui->lineEdit_10->setInputMask("");
+        setGeneratorStatusByBite(10);
     }
     ui->lineEdit_10->setText(strHwControl);
 }
 
 void MainWindow::on_checkBox_12_toggled(bool checked)
 {
+    ui->lineEdit_12->clear();
     if (checked)
     {
         // show hex
         strSerialControl = convertDecStrToHex(strSerialControl, 1);
         ui->lineEdit_12->setValidator(_pHexStrValidator);
+        ui->lineEdit_12->setInputMask(strInputMaskHex1);
     }
     else
     {
         // show dec
         strSerialControl = QString::number(convertHexStrToLong(strSerialControl));
         ui->lineEdit_12->setValidator(_pDecStrValidator);
+        ui->lineEdit_12->setInputMask("");
+        setGeneratorStatusByBite(12);
 
     }
     ui->lineEdit_12->setText(strSerialControl);
@@ -343,18 +415,30 @@ void MainWindow::on_lineEdit_1_textChanged(const QString &arg1)
 {
     if (ui->checkBox_1->checkState() == Qt::Checked)
     {
+        //qDebug() << "textChanged, arg1 =>" << arg1;
+        //qDebug() << "ui->lineEdit_1->inputMask() =>" << ui->lineEdit_1->inputMask();
+        //qDebug() << "textChanged, lineEdit_1->text() =>" << ui->lineEdit_1->text();
         if (ui->lineEdit_1->hasAcceptableInput()
                 && arg1.length() == 11)
         {
             strManufactoryID = ui->lineEdit_1->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(1);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(1);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strManufactoryID = ui->lineEdit_1->text();
     }
 }
 
@@ -366,14 +450,23 @@ void MainWindow::on_lineEdit_2_textChanged(const QString &arg1)
                 && arg1.length() == 11)
         {
             strFrequency = ui->lineEdit_2->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(2);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(2);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strFrequency = ui->lineEdit_2->text();
     }
 }
 
@@ -385,14 +478,23 @@ void MainWindow::on_lineEdit_3_textChanged(const QString &arg1)
                 && arg1.length() == 11)
         {
             strSymRate = ui->lineEdit_3->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(3);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(3);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strSymRate = ui->lineEdit_3->text();
     }
 }
 
@@ -404,14 +506,23 @@ void MainWindow::on_lineEdit_5_textChanged(const QString &arg1)
                 && arg1.length() == 5)
         {
             strPid = ui->lineEdit_5->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(5);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(5);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strPid = ui->lineEdit_5->text();
     }
 }
 
@@ -423,14 +534,23 @@ void MainWindow::on_lineEdit_6_textChanged(const QString &arg1)
                 && arg1.length() == 11)
         {
             strStartSerialNo = ui->lineEdit_6->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(6);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(6);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strStartSerialNo = ui->lineEdit_6->text();
     }
 }
 
@@ -442,14 +562,23 @@ void MainWindow::on_lineEdit_7_textChanged(const QString &arg1)
                 && arg1.length() == 11)
         {
             strEndSerialNo = ui->lineEdit_7->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(7);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(7);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strEndSerialNo = ui->lineEdit_7->text();
     }
 }
 
@@ -461,14 +590,23 @@ void MainWindow::on_lineEdit_8_textChanged(const QString &arg1)
                 && arg1.length() == 11)
         {
             strSoftVer = ui->lineEdit_8->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(8);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(8);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strSoftVer = ui->lineEdit_8->text();
     }
 }
 
@@ -480,14 +618,23 @@ void MainWindow::on_lineEdit_9_textChanged(const QString &arg1)
                 && arg1.length() == 11)
         {
             strHardwareVer = ui->lineEdit_9->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(9);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(9);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strHardwareVer = ui->lineEdit_9->text();
     }
 }
 
@@ -499,14 +646,23 @@ void MainWindow::on_lineEdit_10_textChanged(const QString &arg1)
                 && arg1.length() == 2)
         {
             strHwControl = ui->lineEdit_10->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(10);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(10);
         }
+    }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strHwControl = ui->lineEdit_10->text();
     }
 }
 
@@ -518,15 +674,29 @@ void MainWindow::on_lineEdit_12_textChanged(const QString &arg1)
                 && arg1.length() == 2)
         {
             strSerialControl = ui->lineEdit_12->text();
-            ui->pushButton_generate->setEnabled(true);
+            clearGeneratorStatusByBite(12);
         }
         else
         {
             // no valid data
             ui->lineEdit_result->clear();
-            ui->pushButton_generate->setEnabled(false);
+            setGeneratorStatusByBite(12);
         }
     }
+    else
+    {
+        if (arg1.isEmpty() || arg1.contains(':'))
+        {
+            // it's not tigger by editting the decimal number
+            return;
+        }
+        strSerialControl = ui->lineEdit_12->text();
+    }
+}
+
+void MainWindow::on_pushButton_close_clicked()
+{
+    closeFile();
 }
 
 void MainWindow::on_pushButton_default_clicked()
@@ -708,36 +878,14 @@ void MainWindow::showAboutMessageBox()
 {
     QMessageBox::about(this,
                        "About PrivateDataGenerator",
-                       "              PrivateDataGenerator               \n"
-                       "This software is for generating Private Data that\n"
-                       "follows the COSHIP OTC Standard.\n"
-                       "-------------------------------------------------\n"
-                       "********   Author: QuNengrong (Neo Qu)   ********\n"
-                       "********   Email : Quner612#qq.com       ********\n"
-                       "-------------------------------------------------\n"
-                       "Copyright (c) 2013, Coship, All rights reserved.");
+                       strMsgAboutSoftware);
 }
 
 void MainWindow::showHelpMessageBox()
 {
     QMessageBox::about(this,
                        "PrivateDataGenerator Help",
-                       "        PrivateDataGenerator User Guide        \n"
-                       "1. Click 'Default' or 'Open' to get basic data;\n"
-                       "2. Edit the data as you wish\n"
-                       "3. Click 'Generate' to get your private data\n"
-                       "4. Copy the private data, or Save it to a file\n"
-                       "-------------------------------------------------\n"
-                       "        PrivateDataGenerator Edit Tips        \n"
-                       "A). Hex data only accept data like this: ##, ##:##,\n"
-                       "   ##:##:##:##, where, # stands for hex numbers;\n"
-                       "B). While edit, you may uncheck the CheckBox in the\n"
-                       "   Same line, to see the Decimal value of the line.\n"
-                       "-------------------------------------------------\n"
-                       "********   Author: QuNengrong (Neo Qu)   ********\n"
-                       "********   Email : Quner612#qq.com       ********\n"
-                       "-------------------------------------------------\n"
-                       "Copyright (c) 2013, Coship, All rights reserved.");
+                       strMsgHelpDetail);
 }
 
 bool MainWindow::showPrivateData()
@@ -759,3 +907,38 @@ bool MainWindow::showPrivateData()
     return true;
 }
 
+void MainWindow::setGeneratorStatusByBite(int bit)
+{
+    if (bit<0 || bit>24)
+    {
+        return;
+    }
+    lBitStatusForDisableGenerator |= (1U<<(bit));
+    ui->pushButton_generate->setEnabled(false);
+    ui->label_notice->setText("[Useful Tips]\n1. Don't leave blank data;\n2. Check all the checkbox(beside 'Hex');");
+}
+
+void MainWindow::clearGeneratorStatusByBite(int bit)
+{
+    if (bit<0 || bit>24)
+    {
+        return;
+    }
+    lBitStatusForDisableGenerator &= ~(1U<<(bit));
+    if (!lBitStatusForDisableGenerator)
+    {
+        ui->pushButton_generate->setEnabled(true);
+        ui->label_notice->setText("[Status Ready]\nAll data seems correct,Click <Generator> to get your data!!!");
+    }
+}
+
+void MainWindow::on_lineEdit_result_selectionChanged()
+{
+    if ((!ui->lineEdit_result->text().isEmpty())
+            && ui->lineEdit_result->selectedText() == ui->lineEdit_result->text())
+    {
+        QClipboard *clipboard = QApplication::clipboard();
+        clipboard->setText(ui->lineEdit_result->text());
+        ui->statusBar->showMessage("Your private data has been copyed :)", 5000);
+    }
+}
